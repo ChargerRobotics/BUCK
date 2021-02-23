@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -49,7 +50,6 @@ public class Robot extends TimedRobot {
   // INSTANTIATE FLYWHEEL MOTORS AND FLYWHEEL
   public SpeedController leftFlywheelMotor = new PWMVictorSPX(0);
   public SpeedController rightFlywheelMotor = new PWMVictorSPX(0);
-  public SpeedControllerGroup flywheelDrive = new SpeedControllerGroup(rightBackDrive, rightFrontDrive);
   /***********************************************************************************************************************************************/ 
 
   /* PNEUMANTICS AND LIMELIGHT */
@@ -58,10 +58,10 @@ public class Robot extends TimedRobot {
   public Compressor compressor = new Compressor();
 
   // INSTANTIATE INTAKE SOLENOID
-  public DoubleSolenoid intakeSolenoid = new DoubleSolenoid(1, 0);
+  public DoubleSolenoid intakePiston = new DoubleSolenoid(0, 1);
 
   // INSTANTIATE STORAGE SOLENOID
-  public DoubleSolenoid storageSolenoid = new DoubleSolenoid(2, 3);
+  public DoubleSolenoid storagePiston = new DoubleSolenoid(2, 3);
 
   // INSTANTIATE LIMELIGHT TABLE
   public NetworkTable tableLimelight = NetworkTableInstance.getDefault().getTable("limelight");
@@ -152,11 +152,90 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when teleop is enabled. */
   @Override
-  public void teleopInit() {}
+  public void teleopInit() {
+    intakePiston.set(Value.kForward);
+  }
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    /* DRIVETRAIN */
+    /***********************************************************************************************************************************************/
+    // SETS VARIABLES AS AXES ON CONTROLLER
+    double leftY = controller.getRawAxis(leftStickY);
+    double rightY = controller.getRawAxis(rightStickY);
+    double rightTrig = controller.getRawAxis(rightTrigger);
+
+    // READS TRIGGER VALUES TO ADJUST SPEED OF DRIVETRAIN
+    if (rightTrig > .5) {
+      leftY = leftY * .95;
+      rightY = rightY * .95;
+    } else {
+      leftY = leftY * .65;
+      rightY = rightY * .65;
+    }
+
+    // REMOVES CONTROLLER DRIFT
+    if (leftY < .05) {
+      if (leftY > -.05) {
+        leftY = 0;
+      }
+    }
+    if (rightY < .05) {
+      if (rightY > -.05) {
+        rightY = 0;
+      }
+    }
+
+    // SETS DRIVE SIDES TO AXES
+    leftDrive.set(-leftY);
+    rightDrive.set(rightY);
+    /***********************************************************************************************************************************************/
+    
+    /* INTAKE w/STORAGE */
+    /***********************************************************************************************************************************************/
+    // SETS BOOLEANS AS BUTTONS ON CONTROLLER
+    boolean leftBump = leftBumper.get();
+    boolean yBtn = yButton.get();
+
+    // IF LEFTBUMPER PRESSED, ACTIVATE INTAKE MOTOR AND ACTIVATE STORAGE PISTON
+    if(leftBump == true) {
+      intakeMotor.set(.25);
+      storagePiston.set(Value.kForward);
+    } else {
+      intakeMotor.set(0);
+      storagePiston.set(Value.kReverse);
+    }
+    
+    // TOGGLE INTAKE PISTON WHEN A BUTTON IS PRESSED
+    if(yBtn == true) {
+      intakePiston.toggle();
+    } 
+    /***********************************************************************************************************************************************/
+
+    /* FLYWHEEL w/STORAGE */
+    /***********************************************************************************************************************************************/
+    // SETS BOOLEANS AS BUTTONS ON CONTROLLER
+    boolean rightBump = rightBumper.get();
+    boolean aBtn = aButton.get();
+
+    // IF RIGHT BUMPER PRESSED, ACTIVATE FLYWHEEL MOTORS AND STORAGE MOTOR(ONLY WHEN A BUTTON IS ALSO PRESSED)
+    if(rightBump == true) {
+      leftFlywheelMotor.set(-1);
+      rightFlywheelMotor.set(1);
+
+      if(aBtn == true) {
+        storageMotor.set(.8);
+      } 
+      
+    } else {
+      leftFlywheelMotor.set(0);
+      rightFlywheelMotor.set(0);
+      storageMotor.set(0);
+    }
+    /***********************************************************************************************************************************************/
+
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
