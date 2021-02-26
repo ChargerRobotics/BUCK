@@ -1,55 +1,43 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-/**
- * The VM is configured to automatically run this class, and to call the functions corresponding to
- * each mode, as described in the TimedRobot documentation. If you change the name of this class or
- * the package after creating this project, you must also update the build.gradle file in the
- * project.
- */
 public class Robot extends TimedRobot {
 
   /* DRIVETRAIN */
   /***********************************************************************************************************************************************/
   // INSTANTIATE LEFT MOTORS AND LEFT DRIVE
-  public  SpeedController leftBackDrive = new PWMVictorSPX(0);
-  public SpeedController leftFrontDrive = new PWMVictorSPX(0);
+  public SpeedController leftBackDrive = new PWMVictorSPX(4);
+  public SpeedController leftFrontDrive = new PWMVictorSPX(5);
   public SpeedControllerGroup leftDrive = new SpeedControllerGroup(leftBackDrive, leftFrontDrive);
 
   // INSTANTIATE RIGHT MOTORS AND RIGHT DRIVE
-  public SpeedController rightBackDrive = new PWMVictorSPX(0);
-  public SpeedController rightFrontDrive = new PWMVictorSPX(0);
+  public SpeedController rightBackDrive = new PWMVictorSPX(3);
+  public SpeedController rightFrontDrive = new PWMVictorSPX(2);
   public SpeedControllerGroup rightDrive = new SpeedControllerGroup(rightBackDrive, rightFrontDrive);
   /***********************************************************************************************************************************************/
   
   /* INTAKE, STORAGE, AND FLYWHEEL MOTORS */
   /***********************************************************************************************************************************************/
   // INSTANTIATE INTAKE MOTOR
-  public PWMVictorSPX intakeMotor = new PWMVictorSPX(0);
+  public PWMVictorSPX intakeMotor = new PWMVictorSPX(6);
 
   // INSTANTIATE STORAGE MOTOR
-  public PWMVictorSPX storageMotor = new PWMVictorSPX(0);
+  public PWMVictorSPX storageMotor = new PWMVictorSPX(9);
 
   // INSTANTIATE FLYWHEEL MOTORS AND FLYWHEEL
-  public SpeedController leftFlywheelMotor = new PWMVictorSPX(0);
-  public SpeedController rightFlywheelMotor = new PWMVictorSPX(0);
+  public SpeedController leftFlywheelMotor = new PWMVictorSPX(7);
+  public SpeedController rightFlywheelMotor = new PWMVictorSPX(8);
   /***********************************************************************************************************************************************/ 
 
   /* PNEUMANTICS AND LIMELIGHT */
@@ -61,7 +49,7 @@ public class Robot extends TimedRobot {
   public DoubleSolenoid intakePiston = new DoubleSolenoid(0, 1);
 
   // INSTANTIATE STORAGE SOLENOID
-  public DoubleSolenoid storagePiston = new DoubleSolenoid(2, 3);
+  public DoubleSolenoid storagePiston = new DoubleSolenoid(3, 2);
 
   // INSTANTIATE LIMELIGHT TABLE
   public NetworkTable tableLimelight = NetworkTableInstance.getDefault().getTable("limelight");
@@ -70,119 +58,94 @@ public class Robot extends TimedRobot {
 
   /* CONTROLLER */
   /***********************************************************************************************************************************************/
-  // INSTANTIATE XBOX CONTROLLER
-  public XboxController controller = new XboxController(0);
+  // INSTANTIATE JOYSTICKS
+  public Joystick leftJoystick = new Joystick(0);
+  public Joystick rightJoystick = new Joystick(1);
 
-  // INSTANTIATE JOYSTICK AXES VARIABLES
-  public static int leftStickY = 1;
-  public static int rightStickY = 5;
-  public static int leftTrigger = 2;
-  public static int rightTrigger = 3;
+  // INSTANTIATE RIGHT JOYSTICK AXES VARIABLES
+  public static int rightStickX = 0;
+  public static int rightStickY = 1;
+
+  // INSTANTIATE LEFT JOYSTICK AXES VARIABLES
+   public static int leftStickX = 0;
+   public static int leftStickY = 1;
 
   // INSTANTIATE JOYSTICK BUTTONS
-  public JoystickButton aButton = new JoystickButton(controller, 1);
-  public JoystickButton bButton = new JoystickButton(controller, 2);
-  public JoystickButton xButton = new JoystickButton(controller, 3);
-  public JoystickButton yButton = new JoystickButton(controller, 4);
-  public JoystickButton leftBumper = new JoystickButton(controller, 5);
-  public JoystickButton rightBumper = new JoystickButton(controller, 6);
+  public JoystickButton l1Button = new JoystickButton(leftJoystick, 1);
+  public JoystickButton l2Button = new JoystickButton(leftJoystick, 2);
+  public JoystickButton l3Button = new JoystickButton(leftJoystick, 3);
+  public JoystickButton l4Button = new JoystickButton(leftJoystick, 4);
+  public JoystickButton l5Button = new JoystickButton(leftJoystick, 5);
+  public JoystickButton l6Button = new JoystickButton(leftJoystick, 6);
+   
+  // INSTANTIATE JOYSTICK BUTTONS
+  public JoystickButton r1Button = new JoystickButton(rightJoystick, 1);
+  public JoystickButton r2Button = new JoystickButton(rightJoystick, 2);
+  public JoystickButton r3Button = new JoystickButton(rightJoystick, 3);
+  public JoystickButton r4Button = new JoystickButton(rightJoystick, 4);
+  public JoystickButton r5Button = new JoystickButton(rightJoystick, 5);
+  public JoystickButton r6Button = new JoystickButton(rightJoystick, 6);
   /***********************************************************************************************************************************************/
   
-  /* CHOOSER */
-  /***********************************************************************************************************************************************/
-  private static final String kDefaultAuto = "Default";
-  private static final String kCustomAuto = "My Auto";
-  private String m_autoSelected;
-  private final SendableChooser<String> m_chooser = new SendableChooser<>();
-  /***********************************************************************************************************************************************/
-
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
   @Override
   public void robotInit() {
-    m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
-    m_chooser.addOption("My Auto", kCustomAuto);
-    SmartDashboard.putData("Auto choices", m_chooser);
+     // RESET PNEUMATICS
+    storagePiston.set(Value.kReverse);
+    intakePiston.set(Value.kReverse);
+    compressor.clearAllPCMStickyFaults();
+    compressor.start();
+
+    // TURN LIMELIGHT OFF
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
   }
 
-  /**
-   * This function is called every robot packet, no matter the mode. Use this for items like
-   * diagnostics that you want ran during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
   @Override
   public void robotPeriodic() {}
 
-  /**
-   * This autonomous (along with the chooser code above) shows how to select between different
-   * autonomous modes using the dashboard. The sendable chooser code works with the Java
-   * SmartDashboard. If you prefer the LabVIEW Dashboard, remove all of the chooser code and
-   * uncomment the getString line to get the auto name from the text box below the Gyro
-   *
-   * <p>You can add additional auto modes by adding additional comparisons to the switch structure
-   * below with additional strings. If using the SendableChooser make sure to add them to the
-   * chooser code above as well.
-   */
   @Override
-  public void autonomousInit() {
-  // RUN CHOOSER
-    m_autoSelected = m_chooser.getSelected();
-    // m_autoSelected = SmartDashboard.getString("Auto Selector", kDefaultAuto);
-    System.out.println("Auto selected: " + m_autoSelected);
+  public void autonomousInit() {}
 
-  }
-
-  /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {
-    switch (m_autoSelected) {
-      case kCustomAuto:
-        // Put custom auto code here
-        break;
-      case kDefaultAuto:
-      default:
-        // Put default auto code here
-        break;
-    }
-  }
+  public void autonomousPeriodic() {}
 
-  /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
     intakePiston.set(Value.kForward);
   }
 
-  /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    double leftY = leftJoystick.getRawAxis(leftStickY);
+    double rightY = rightJoystick.getRawAxis(rightStickY);
+    boolean right1 = r1Button.get();
+    boolean right2 = r2Button.get();
+    boolean left1 = l1Button.get();
+    boolean left2 = l2Button.get();
+    
     /* DRIVETRAIN */
     /***********************************************************************************************************************************************/
-    // SETS VARIABLES AS AXES ON CONTROLLER
-    double leftY = controller.getRawAxis(leftStickY);
-    double rightY = controller.getRawAxis(rightStickY);
-    double rightTrig = controller.getRawAxis(rightTrigger);
+    // SCALE DOWN JOYSTICK AXIS VALUES
+    leftY = leftY*.7;
+    rightY = rightY*.7;
+    
 
-    // READS TRIGGER VALUES TO ADJUST SPEED OF DRIVETRAIN
-    if (rightTrig > .5) {
+    // READS BUTTON VALUES TO ADJUST SPEED OF DRIVETRAIN
+    if (left2 == true) {
       leftY = leftY * .95;
       rightY = rightY * .95;
     } else {
-      leftY = leftY * .65;
-      rightY = rightY * .65;
+      leftY = leftY * .55;
+      rightY = rightY * .55;
     }
 
     // REMOVES CONTROLLER DRIFT
-    if (leftY < .05) {
-      if (leftY > -.05) {
+    if (leftY < .1) {
+      if (leftY > -.1) {
         leftY = 0;
       }
     }
-    if (rightY < .05) {
-      if (rightY > -.05) {
+    if (rightY < .1) {
+      if (rightY > -.1) {
         rightY = 0;
       }
     }
@@ -190,47 +153,37 @@ public class Robot extends TimedRobot {
     // SETS DRIVE SIDES TO AXES
     leftDrive.set(-leftY);
     rightDrive.set(rightY);
+    
     /***********************************************************************************************************************************************/
     
     /* INTAKE w/STORAGE */
     /***********************************************************************************************************************************************/
-    // SETS BOOLEANS AS BUTTONS ON CONTROLLER
-    boolean leftBump = leftBumper.get();
-    boolean yBtn = yButton.get();
-
     // IF LEFTBUMPER PRESSED, ACTIVATE INTAKE MOTOR AND ACTIVATE STORAGE PISTON
-    if(leftBump == true) {
-      intakeMotor.set(.25);
+    if(left1 == true) {
+      intakeMotor.set(.4);
       storagePiston.set(Value.kForward);
     } else {
       intakeMotor.set(0);
       storagePiston.set(Value.kReverse);
     }
     
-    // TOGGLE INTAKE PISTON WHEN A BUTTON IS PRESSED
-    if(yBtn == true) {
-      intakePiston.toggle();
-    } 
     /***********************************************************************************************************************************************/
 
     /* FLYWHEEL w/STORAGE */
     /***********************************************************************************************************************************************/
-    // SETS BOOLEANS AS BUTTONS ON CONTROLLER
-    boolean rightBump = rightBumper.get();
-    boolean aBtn = aButton.get();
-
-    // IF RIGHT BUMPER PRESSED, ACTIVATE FLYWHEEL MOTORS AND STORAGE MOTOR(ONLY WHEN A BUTTON IS ALSO PRESSED)
-    if(rightBump == true) {
+    // IF RIGHT TRIGGER PRESSED, ACTIVATE FLYWHEEL MOTORS
+    if(right1 == true) {
       leftFlywheelMotor.set(-1);
-      rightFlywheelMotor.set(1);
-
-      if(aBtn == true) {
-        storageMotor.set(.8);
-      } 
-      
+      rightFlywheelMotor.set(-1);
     } else {
       leftFlywheelMotor.set(0);
       rightFlywheelMotor.set(0);
+    }
+
+    // IF BUTTON 2 PRESSED, ACTIVATE STORAGE MOTOR
+    if(right2 == true) {
+      storageMotor.set(.85);
+    } else {
       storageMotor.set(0);
     }
     /***********************************************************************************************************************************************/
