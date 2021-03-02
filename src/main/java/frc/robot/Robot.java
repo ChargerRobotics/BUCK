@@ -1,6 +1,9 @@
 package frc.robot;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -46,7 +49,7 @@ public class Robot extends TimedRobot {
   public Compressor compressor = new Compressor();
 
   // INSTANTIATE INTAKE SOLENOID
-  public DoubleSolenoid intakePiston = new DoubleSolenoid(0, 1);
+  public DoubleSolenoid intakePiston = new DoubleSolenoid(6, 1);
 
   // INSTANTIATE STORAGE SOLENOID
   public DoubleSolenoid storagePiston = new DoubleSolenoid(3, 2);
@@ -95,8 +98,10 @@ public class Robot extends TimedRobot {
     compressor.clearAllPCMStickyFaults();
     compressor.start();
 
-    // TURN LIMELIGHT OFF
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+     // START CAMERA
+     UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+     camera.setFPS(30);
+     camera.setResolution(640, 480);
   }
 
   @Override
@@ -110,32 +115,40 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    intakePiston.set(Value.kForward);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
   }
 
   @Override
   public void teleopPeriodic() {
+    /* CONTROLLER */
+    /***********************************************************************************************************************************************/
+    // MAPPING BUTTONS AND JOYSTICK INPUTS TO VARIABLES
     double leftY = leftJoystick.getRawAxis(leftStickY);
     double rightY = rightJoystick.getRawAxis(rightStickY);
     boolean right1 = r1Button.get();
     boolean right2 = r2Button.get();
+    boolean right3 = r3Button.get();
+    boolean right4 = r4Button.get();
     boolean left1 = l1Button.get();
-    boolean left2 = l2Button.get();
+    boolean left5 = l5Button.get();
+    boolean left3 = l3Button.get();
+    boolean left4 = l4Button.get();
+    boolean left6 = l6Button.get();
+    /***********************************************************************************************************************************************/
     
     /* DRIVETRAIN */
     /***********************************************************************************************************************************************/
     // SCALE DOWN JOYSTICK AXIS VALUES
-    leftY = leftY*.7;
-    rightY = rightY*.7;
-    
+    leftY = leftY*.8;
+    rightY = rightY*.8;
 
     // READS BUTTON VALUES TO ADJUST SPEED OF DRIVETRAIN
-    if (left2 == true) {
+    if (right3 == true) {
       leftY = leftY * .95;
       rightY = rightY * .95;
     } else {
-      leftY = leftY * .55;
-      rightY = rightY * .55;
+      leftY = leftY * .75;
+      rightY = rightY * .75;
     }
 
     // REMOVES CONTROLLER DRIFT
@@ -153,41 +166,86 @@ public class Robot extends TimedRobot {
     // SETS DRIVE SIDES TO AXES
     leftDrive.set(-leftY);
     rightDrive.set(rightY);
-    
     /***********************************************************************************************************************************************/
     
     /* INTAKE w/STORAGE */
     /***********************************************************************************************************************************************/
-    // IF LEFTBUMPER PRESSED, ACTIVATE INTAKE MOTOR AND ACTIVATE STORAGE PISTON
+    // IF BUTTON PRESSED, ACTIVATE INTAKE MOTOR
     if(left1 == true) {
-      intakeMotor.set(.4);
-      storagePiston.set(Value.kForward);
+      intakeMotor.set(.5);
     } else {
       intakeMotor.set(0);
-      storagePiston.set(Value.kReverse);
     }
-    
+
+    // IF BUTTON PRESSED, ACTIVATE AND DEACTIVATE INTAKE PISTON
+    if(left3 == true) {
+      intakePiston.set(Value.kReverse);
+    }
+
+    if (left5 == true) {
+      intakePiston.set(Value.kForward);
+    }
     /***********************************************************************************************************************************************/
 
     /* FLYWHEEL w/STORAGE */
     /***********************************************************************************************************************************************/
     // IF RIGHT TRIGGER PRESSED, ACTIVATE FLYWHEEL MOTORS
     if(right1 == true) {
-      leftFlywheelMotor.set(-1);
-      rightFlywheelMotor.set(-1);
+      leftFlywheelMotor.setVoltage(-11);
+      rightFlywheelMotor.setVoltage(-11);
     } else {
       leftFlywheelMotor.set(0);
       rightFlywheelMotor.set(0);
     }
 
-    // IF BUTTON 2 PRESSED, ACTIVATE STORAGE MOTOR
+    // IF BUTTON PRESSED, ACTIVATE STORAGE MOTOR
     if(right2 == true) {
-      storageMotor.set(.85);
+      storageMotor.setVoltage(10);
     } else {
       storageMotor.set(0);
     }
+
+    // IF BUTTON PRESSED, ACTIVATE AND DEACTIVATE STORAGE PISTON
+    if (left4 == true) {
+      storagePiston.set(Value.kForward);
+    }
+    if (left6 == true) {
+      storagePiston.set(Value.kReverse);
+    }
     /***********************************************************************************************************************************************/
 
+    /* LIMELIGHT */
+    /***********************************************************************************************************************************************/
+    if (right4 == true) {
+    // ACTIVIATE LIMELIGHT
+     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+     NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
+
+     NetworkTableEntry tx = tableLimelight.getEntry("tx");
+     
+     double x = tx.getDouble(0.0);
+     double min_command = 0.05;
+     double Kp = -0.5;
+     double heading_error = -x;
+     double steering_adjust = 0;
+
+        if (x > 1.0) {
+          steering_adjust = Kp*heading_error - min_command;
+        }
+        else if (x < 1.0)
+        {
+          steering_adjust = Kp*heading_error + min_command;
+        }
+
+        double left_command = steering_adjust;
+        double right_command = steering_adjust;
+        leftDrive.set(left_command);
+        rightDrive.set(-right_command);
+    } else {
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    }
+    /***********************************************************************************************************************************************/
   }
 
   /** This function is called once when the robot is disabled. */
