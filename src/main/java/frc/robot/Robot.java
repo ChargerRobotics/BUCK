@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -36,7 +37,8 @@ public class Robot extends TimedRobot {
   public PWMVictorSPX intakeMotor = new PWMVictorSPX(6);
 
   // INSTANTIATE STORAGE MOTOR
-  public PWMVictorSPX storageMotor = new PWMVictorSPX(9);
+  //public PWMVictorSPX storageMotor = new PWMVictorSPX(9);
+  public Spark storageMotor = new Spark(9);
 
   // INSTANTIATE FLYWHEEL MOTORS AND FLYWHEEL
   public SpeedController leftFlywheelMotor = new PWMVictorSPX(7);
@@ -108,14 +110,74 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {}
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+    storageMotor.set(0);
+    leftFlywheelMotor.set(0);
+    rightFlywheelMotor.set(0);
+    // ACTIVIATE LIMELIGHT
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    
+    // DRIVE ROBOT FORWARD
+    leftDrive.set(-.43);
+    rightDrive.set(.4);
+    edu.wpi.first.wpilibj.Timer.delay(1.6);
+
+    long start = System.currentTimeMillis();
+    long end = start + 2000;
+
+    while (System.currentTimeMillis() < end) {
+    // ACTIVIATE LIMELIGHT
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
+
+     // UPDATE NETOWRKTABLES, SET VARIABLES
+     NetworkTableEntry tx = tableLimelight.getEntry("tx");
+     double x = tx.getDouble(0.0);
+     double min_command = 0.05;
+     double Kp = -0.05;
+     double heading_error = -x*.3;
+     double steering_adjust = 0;
+
+     // MULIPLIED BY A CONSTANT, CACLULATE THE STEERING ADJUSTMEANT BY MULTIPLYING THE CONSTANT BY THE AMOUNT NEEDED TO ROTATE, IMPLEMENTING A SMALL REQUIRED MOVEMENT
+     if (x > 1.0) {
+         steering_adjust = Kp*heading_error + min_command;
+       }
+       else if (x < 1.0) {
+         steering_adjust = Kp*heading_error - min_command;
+       }
+       // SET STEERING ADJUST TO DRIVE SIDES
+       leftDrive.set(steering_adjust);
+       rightDrive.set(steering_adjust);
+      }
+    // ACTIVATE SHOOTER MOTORS
+    leftFlywheelMotor.setVoltage(-6.5);
+    rightFlywheelMotor.setVoltage(-6);
+    edu.wpi.first.wpilibj.Timer.delay(4.5);
+    storageMotor.setVoltage(8);
+    edu.wpi.first.wpilibj.Timer.delay(.1);
+    storageMotor.setVoltage(0);
+    edu.wpi.first.wpilibj.Timer.delay(2);
+    storageMotor.setVoltage(8);
+    edu.wpi.first.wpilibj.Timer.delay(.1);
+    storageMotor.setVoltage(0);
+    edu.wpi.first.wpilibj.Timer.delay(2);
+    storageMotor.setVoltage(8);
+    edu.wpi.first.wpilibj.Timer.delay(.2);
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    leftFlywheelMotor.setVoltage(0);
+    rightFlywheelMotor.setVoltage(0);
+    storageMotor.setVoltage(0);
+  }
 
   @Override
   public void teleopInit() {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    //NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    leftFlywheelMotor.setVoltage(0);
+    rightFlywheelMotor.setVoltage(0);
+    storageMotor.setVoltage(0);
   }
 
   @Override
@@ -177,11 +239,10 @@ public class Robot extends TimedRobot {
       intakeMotor.set(0);
     }
 
-    // IF BUTTON PRESSED, ACTIVATE AND DEACTIVATE INTAKE PISTON
+    // IF BUTTON PRESSED, ACTIVATE OR DEACTIVATE INTAKE PISTON
     if(left3 == true) {
       intakePiston.set(Value.kReverse);
     }
-
     if (left5 == true) {
       intakePiston.set(Value.kForward);
     }
@@ -191,7 +252,7 @@ public class Robot extends TimedRobot {
     /***********************************************************************************************************************************************/
     // IF RIGHT TRIGGER PRESSED, ACTIVATE FLYWHEEL MOTORS
     if(right1 == true) {
-      leftFlywheelMotor.setVoltage(-11);
+      leftFlywheelMotor.setVoltage(-12);
       rightFlywheelMotor.setVoltage(-11);
     } else {
       leftFlywheelMotor.set(0);
@@ -205,7 +266,7 @@ public class Robot extends TimedRobot {
       storageMotor.set(0);
     }
 
-    // IF BUTTON PRESSED, ACTIVATE AND DEACTIVATE STORAGE PISTON
+    // IF BUTTON PRESSED, ACTIVATE OR DEACTIVATE STORAGE PISTON
     if (left4 == true) {
       storagePiston.set(Value.kForward);
     }
@@ -216,34 +277,34 @@ public class Robot extends TimedRobot {
 
     /* LIMELIGHT */
     /***********************************************************************************************************************************************/
+    // IF BUTTON PRESSED, RUN LIMELIGHT
     if (right4 == true) {
-    // ACTIVIATE LIMELIGHT
+     // ACTIVIATE LIMELIGHT
      NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
      NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(0);
 
-     NetworkTableEntry tx = tableLimelight.getEntry("tx");
-     
-     double x = tx.getDouble(0.0);
-     double min_command = 0.05;
-     double Kp = -0.5;
-     double heading_error = -x;
-     double steering_adjust = 0;
+      // UPDATE NETOWRKTABLES, SET VARIABLES
+      NetworkTableEntry tx = tableLimelight.getEntry("tx");
+      double x = tx.getDouble(0.0);
+      double min_command = 0.05;
+      double Kp = -0.05;
+      double heading_error = -x*.3;
+      double steering_adjust = 0;
 
-        if (x > 1.0) {
-          steering_adjust = Kp*heading_error - min_command;
-        }
-        else if (x < 1.0)
-        {
+      // MULIPLIED BY A CONSTANT, CACLULATE THE STEERING ADJUSTMEANT BY MULTIPLYING THE CONSTANT BY THE AMOUNT NEEDED TO ROTATE, IMPLEMENTING A SMALL REQUIRED MOVEMENT
+      if (x > 1.0) {
           steering_adjust = Kp*heading_error + min_command;
         }
-
-        double left_command = steering_adjust;
-        double right_command = steering_adjust;
-        leftDrive.set(left_command);
-        rightDrive.set(-right_command);
+        else if (x < 1.0) {
+          steering_adjust = Kp*heading_error - min_command;
+        }
+        // SET STEERING ADJUST TO DRIVE SIDES
+        leftDrive.set(steering_adjust);
+        rightDrive.set(steering_adjust);
     } else {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
+    // SHUT OFF LIMELIGHT AND USE AS NORMAL CAMERA
+    //NetworkTableInstance.getDefault().getTable("limelight").getEntry("camMode").setNumber(1);
+    //NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     }
     /***********************************************************************************************************************************************/
   }
