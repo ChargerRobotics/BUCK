@@ -31,7 +31,7 @@ public class Robot extends TimedRobot {
   public SpeedControllerGroup rightDrive = new SpeedControllerGroup(rightBackDrive, rightFrontDrive);
   /***********************************************************************************************************************************************/
   
-  /* INTAKE, STORAGE, AND FLYWHEEL MOTORS */
+  /* INTAKE, STORAGE, FLYWHEEL, ARM, AND CLAW MOTORS */
   /***********************************************************************************************************************************************/
   // INSTANTIATE INTAKE MOTOR
   public PWMVictorSPX intakeMotor = new PWMVictorSPX(6);
@@ -43,6 +43,10 @@ public class Robot extends TimedRobot {
   // INSTANTIATE FLYWHEEL MOTORS AND FLYWHEEL
   public SpeedController leftFlywheelMotor = new PWMVictorSPX(7);
   public SpeedController rightFlywheelMotor = new PWMVictorSPX(8);
+
+  // INSTANTIATE CLAW AND ARM MOTORS
+  public SpeedController armMotor = new PWMVictorSPX(0);
+  public SpeedController clawMotor = new PWMVictorSPX(1);
   /***********************************************************************************************************************************************/ 
 
   /* PNEUMANTICS AND LIMELIGHT */
@@ -273,6 +277,39 @@ public class Robot extends TimedRobot {
     if (left6 == true) {
       storagePiston.set(Value.kReverse);
     }
+    /***********************************************************************************************************************************************/
+
+
+    /* ARM AND CLAW */
+    /***********************************************************************************************************************************************/
+    int dPad = rightJoystick.getPOV();
+
+    if (dPad == 0)
+    {
+      armMotor.set(1);
+    }
+    else if (dPad == 4)
+    {
+      armMotor.set(-1);
+    }
+    else
+    {
+      armMotor.set(-.2);
+    }
+
+    if (dPad == 2)
+    {
+      clawMotor.set(.15);
+    }
+    else if (dPad == 6)
+    {
+      clawMotor.set(-.15);
+    } else
+    {
+      clawMotor.set(0);
+    }
+
+
     /***********************************************************************************************************************************************/
 
     /* LIMELIGHT */
