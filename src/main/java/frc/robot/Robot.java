@@ -1,7 +1,7 @@
 package frc.robot;
 
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.first.cameraserver.CameraServer;
+//import edu.wpi.cscore.UsbCamera;
+//import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
+//import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot {
 
@@ -45,8 +46,8 @@ public class Robot extends TimedRobot {
   public SpeedController rightFlywheelMotor = new PWMVictorSPX(8);
 
   // INSTANTIATE CLAW AND ARM MOTORS
-  public SpeedController armMotor = new PWMVictorSPX(0);
-  public SpeedController clawMotor = new PWMVictorSPX(1);
+  public SpeedController armMotor = new PWMVictorSPX(1);
+  public SpeedController clawMotor = new PWMVictorSPX(0);
   /***********************************************************************************************************************************************/ 
 
   /* PNEUMANTICS AND LIMELIGHT */
@@ -104,10 +105,10 @@ public class Robot extends TimedRobot {
     compressor.clearAllPCMStickyFaults();
     compressor.start();
 
-     // START CAMERA
-     UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-     camera.setFPS(30);
-     camera.setResolution(640, 480);
+    //  // START CAMERA
+    //  UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+    //  camera.setFPS(30);
+    //  camera.setResolution(640, 480);
   }
 
   @Override
@@ -181,7 +182,10 @@ public class Robot extends TimedRobot {
     //NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     leftFlywheelMotor.setVoltage(0);
     rightFlywheelMotor.setVoltage(0);
+    intakeMotor.setVoltage(0);
     storageMotor.setVoltage(0);
+    armMotor.setVoltage(0);
+    clawMotor.setVoltage(0);
   }
 
   @Override
@@ -283,31 +287,33 @@ public class Robot extends TimedRobot {
     /* ARM AND CLAW */
     /***********************************************************************************************************************************************/
     int dPad = rightJoystick.getPOV();
+    System.out.println(dPad);
 
     if (dPad == 0)
     {
-      armMotor.set(1);
+      armMotor.set(0.3);
     }
-    else if (dPad == 4)
+    else if (dPad == 180)
     {
-      armMotor.set(-1);
+      armMotor.set(-0.2);
     }
     else
     {
-      armMotor.set(-.2);
+      armMotor.set(.1);
     }
 
-    if (dPad == 2)
+    if (dPad == 90)
     {
-      clawMotor.set(.15);
+      clawMotor.set(-.28);
     }
-    else if (dPad == 6)
+    else if (dPad == 270)
     {
-      clawMotor.set(-.15);
+      clawMotor.set(.28);
     } else
     {
       clawMotor.set(0);
     }
+    
 
 
     /***********************************************************************************************************************************************/
