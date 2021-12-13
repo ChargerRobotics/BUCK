@@ -1,7 +1,7 @@
 package frc.robot;
 
-//import edu.wpi.cscore.UsbCamera;
-//import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -79,6 +79,7 @@ public class Robot extends TimedRobot {
   // INSTANTIATE LEFT JOYSTICK AXES VARIABLES
    public static int leftStickX = 0;
    public static int leftStickY = 1;
+   public static int leftSlider = 2;
 
   // INSTANTIATE JOYSTICK BUTTONS
   public JoystickButton l1Button = new JoystickButton(leftJoystick, 1);
@@ -105,10 +106,11 @@ public class Robot extends TimedRobot {
     compressor.clearAllPCMStickyFaults();
     compressor.start();
 
-    //  // START CAMERA
-    //  UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-    //  camera.setFPS(30);
-    //  camera.setResolution(640, 480);
+      // START CAMERA
+      UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+      camera.setFPS(30);
+      camera.setResolution(640, 480);
+      
   }
 
   @Override
@@ -194,11 +196,20 @@ public class Robot extends TimedRobot {
     /***********************************************************************************************************************************************/
     // MAPPING BUTTONS AND JOYSTICK INPUTS TO VARIABLES
     double leftY = leftJoystick.getRawAxis(leftStickY);
+    double leftSliderValue = leftJoystick.getRawAxis(leftSlider);
+    leftSliderValue *= -1;
+    System.out.println(leftSliderValue);
+    if (leftSlider < 0)
+    {
+      leftSliderValue = 0.5;
+    }
+
     double rightY = rightJoystick.getRawAxis(rightStickY);
     boolean right1 = r1Button.get();
     boolean right2 = r2Button.get();
     boolean right3 = r3Button.get();
     boolean right4 = r4Button.get();
+    boolean right5 = r5Button.get();
     boolean left1 = l1Button.get();
     boolean left5 = l5Button.get();
     boolean left3 = l3Button.get();
@@ -249,10 +260,10 @@ public class Robot extends TimedRobot {
 
     // IF BUTTON PRESSED, ACTIVATE OR DEACTIVATE INTAKE PISTON
     if(left3 == true) {
-      intakePiston.set(Value.kReverse);
+      intakePiston.set(Value.kForward);
     }
     if (left5 == true) {
-      intakePiston.set(Value.kForward);
+      intakePiston.set(Value.kReverse);
     }
     /***********************************************************************************************************************************************/
 
@@ -260,11 +271,20 @@ public class Robot extends TimedRobot {
     /***********************************************************************************************************************************************/
     // IF RIGHT TRIGGER PRESSED, ACTIVATE FLYWHEEL MOTORS
     if(right1 == true) {
-      leftFlywheelMotor.setVoltage(-12);
-      rightFlywheelMotor.setVoltage(-11);
-    } else {
+      leftFlywheelMotor.setVoltage(-12 * leftSliderValue);
+      rightFlywheelMotor.setVoltage(-11 * leftSliderValue);
+    }
+    else
+    {
       leftFlywheelMotor.set(0);
       rightFlywheelMotor.set(0);
+    }
+
+    if(right5 == true)
+    {
+      leftFlywheelMotor.setVoltage(8);
+      rightFlywheelMotor.setVoltage(8);
+      storageMotor.setVoltage(-10);
     }
 
     // IF BUTTON PRESSED, ACTIVATE STORAGE MOTOR
@@ -287,7 +307,7 @@ public class Robot extends TimedRobot {
     /* ARM AND CLAW */
     /***********************************************************************************************************************************************/
     int dPad = rightJoystick.getPOV();
-    System.out.println(dPad);
+    int dPadL = leftJoystick.getPOV();
 
     if (dPad == 0)
     {
@@ -302,16 +322,18 @@ public class Robot extends TimedRobot {
       armMotor.set(.1);
     }
 
-    if (dPad == 90)
+    if (dPadL == 90)
     {
-      clawMotor.set(-.28);
+      clawMotor.set(-.25);
     }
-    else if (dPad == 270)
+    else if (dPadL == 270)
     {
-      clawMotor.set(.28);
-    } else
+      clawMotor.set(.25);
+    }
+    else
     {
-      clawMotor.set(0);
+      clawMotor.set(0
+      );
     }
     
 
