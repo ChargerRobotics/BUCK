@@ -17,7 +17,8 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot 
+{
 
   /* DRIVETRAIN */
   /***********************************************************************************************************************************************/
@@ -98,29 +99,36 @@ public class Robot extends TimedRobot {
   public JoystickButton r6Button = new JoystickButton(rightJoystick, 6);
   /***********************************************************************************************************************************************/
   
+  /** This function is called once whenever the robot starts a sequence. */
   @Override
-  public void robotInit() {
-     // RESET PNEUMATICS
+  public void robotInit() 
+  {
+    // RESET PNEUMATICS
     storagePiston.set(Value.kReverse);
     intakePiston.set(Value.kReverse);
     compressor.clearAllPCMStickyFaults();
     compressor.start();
 
-      // START CAMERA
-      UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
-      camera.setFPS(30);
-      camera.setResolution(640, 480);
+    // START CAMERA
+    UsbCamera camera = CameraServer.getInstance().startAutomaticCapture();
+    camera.setFPS(30);
+    camera.setResolution(640, 480);
       
   }
 
+  /** This function is called periodically when the robot is in a sequence. */
   @Override
   public void robotPeriodic() {}
 
+  /** This function is called once when the robot starts auto. */
   @Override
-  public void autonomousInit() {
+  public void autonomousInit() 
+  {
+    // DEACTIVATE MOTORS
     storageMotor.set(0);
     leftFlywheelMotor.set(0);
     rightFlywheelMotor.set(0);
+
     // ACTIVIATE LIMELIGHT
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     
@@ -156,6 +164,7 @@ public class Robot extends TimedRobot {
        leftDrive.set(steering_adjust);
        rightDrive.set(steering_adjust);
       }
+
     // ACTIVATE SHOOTER MOTORS
     leftFlywheelMotor.setVoltage(-6.5);
     rightFlywheelMotor.setVoltage(-6);
@@ -172,15 +181,19 @@ public class Robot extends TimedRobot {
     edu.wpi.first.wpilibj.Timer.delay(.2);
   }
 
+  /** This function is called periodically when the robot is in auto. */
   @Override
-  public void autonomousPeriodic() {
+  public void autonomousPeriodic() 
+  {
     leftFlywheelMotor.setVoltage(0);
     rightFlywheelMotor.setVoltage(0);
     storageMotor.setVoltage(0);
   }
 
+  /** This function is called once when the robot starts teleop. */
   @Override
-  public void teleopInit() {
+  public void teleopInit() 
+  {
     //NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(1);
     leftFlywheelMotor.setVoltage(0);
     rightFlywheelMotor.setVoltage(0);
@@ -190,8 +203,10 @@ public class Robot extends TimedRobot {
     clawMotor.setVoltage(0);
   }
 
+  /** This function is called periodically when the robot is in teleop. */
   @Override
-  public void teleopPeriodic() {
+  public void teleopPeriodic() 
+  {
     /* CONTROLLER */
     /***********************************************************************************************************************************************/
     // MAPPING BUTTONS AND JOYSTICK INPUTS TO VARIABLES
