@@ -17,7 +17,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.buttons.JoystickButton;
 //import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class MainRobot extends TimedRobot 
+public class StrippedBuck extends TimedRobot 
 {
 
   /* DRIVETRAIN */
@@ -99,6 +99,11 @@ public class MainRobot extends TimedRobot
   public JoystickButton r6Button = new JoystickButton(rightJoystick, 6);
   /***********************************************************************************************************************************************/
   
+  public StrippedBuck()
+  {
+    
+  }
+
   /** This function is called once whenever the robot starts a sequence. */
   @Override
   public void robotInit() 
